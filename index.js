@@ -9,6 +9,7 @@ require('dotenv').config()
 app.get('/', (req, res)=>{
     res.send("Hello World")
 })
+app.use(cors())
 app.use(express.json({ limit: '1000mb' }))
 
 app.use('/api/getcontent',require('./routes/fetchContent'))
