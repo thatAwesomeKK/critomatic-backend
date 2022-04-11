@@ -7,6 +7,8 @@ const connectToMongo = async () => {
     .connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      authSource: "admin",
+      ssl: true,
     })
     .then(() => {
       console.log("Connection Succesfull");
