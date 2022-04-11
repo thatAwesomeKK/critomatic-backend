@@ -4,7 +4,7 @@
   "description": "backend for nextjs frontend",
   "scripts": {
     "test": "echo \"Error: no test specified\"",
-    "start": "node index.js",
+    "start": "node ./index.js",
     "dev": "nodemon ./index.js"
   },
   "main": "index.js",
