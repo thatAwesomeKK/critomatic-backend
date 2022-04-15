@@ -32,11 +32,9 @@ const movieSchema = new Schema({
     }],
     rating: {
         type: String,
-        required: true
     },
     userrating: {
         type: String,
-        required: true
     },
     genre: [{
         type: String,
