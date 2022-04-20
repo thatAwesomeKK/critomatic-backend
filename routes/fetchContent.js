@@ -35,6 +35,15 @@ router.get("/get-movie", async (req, res) => {
   }
 });
 
+router.get("/get-slugs", async (req, res) => {
+  try {
+    let slugs = await Movie.find({}).select('slug')
+    return res.status(200).json(slugs);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+});
+
 router.post("/add-movies", async (req, res) => {
   const castID = []
   const stillsData = []
