@@ -28,26 +28,8 @@ router.get("/get-movies", async (req, res) => {
 
 router.get("/get-movie", async (req, res) => {
   try {
-    let movie = await Movie.findOne({ slug: req.query.slug })
+    let movie = await Movie.findOne({ slug: req.query.slug }).populate('director').populate('cast')
     return res.status(200).json(movie);
-  } catch (error) {
-    return res.status(500).json(error);
-  }
-});
-
-router.get("/get-director", async (req, res) => {
-  try {
-    let directorName = await Director.findOne({ _id: req.query.director })
-    return res.status(200).json(directorName);
-  } catch (error) {
-    return res.status(500).json(error);
-  }
-});
-
-router.get("/get-actor", async (req, res) => {
-  try {
-    let actorName = await Cast.findOne({ _id: req.query.actor })
-    return res.status(200).json(actorName);
   } catch (error) {
     return res.status(500).json(error);
   }
