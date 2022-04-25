@@ -38,7 +38,7 @@ router.get("/get-movie", async (req, res) => {
 //Get all the slugs to use getStaticProps
 router.get("/get-slugs", async (req, res) => {
   try {
-    let slugs = await Movie.find({}).select('slug')
+    let slugs = await MovieInfo.find({}).select('slug')
     return res.status(200).json(slugs);
   } catch (error) {
     return res.status(500).json(error);
