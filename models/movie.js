@@ -2,11 +2,6 @@ const mongoose = require('mongoose')
 const { Schema } = mongoose
 
 const movieSchema = new Schema({
-    slug: {
-        type: String,
-        required: true,
-        unique: true
-    },
     title: {
         type: String,
         required: true
@@ -15,27 +10,28 @@ const movieSchema = new Schema({
         type: String,
         required: true
     },
-    stills: [{
-        type: String
-    }],
     bgimg: {
         type: String,
         required: true
     },
-    director: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'director'
-    },
-    cast: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'cast'
+    crew: [{
+        crewID: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'person'
+        },
+        job: {
+            type: String,
+        }
     }],
-    rating: {
-        type: String,
-    },
-    userrating: {
-        type: String,
-    },
+    cast: [{
+        castID: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'person'
+        },
+        playing: {
+            type: String
+        }
+    }],
     genre: [{
         type: String,
         required: true
@@ -44,16 +40,15 @@ const movieSchema = new Schema({
         type: String,
         required: true
     },
-    boxoffice: {
-        type: String,
-    },
-    ottplatform: {
-        type: String,
-    },
-    duration: {
+    releaseDate: {
         type: String,
         required: true
-    }
+    },
+    video:[
+        {
+            type: Object,
+        }
+    ]
 }, { timestamps: true })
 
 module.exports = mongoose.model('movie', movieSchema)

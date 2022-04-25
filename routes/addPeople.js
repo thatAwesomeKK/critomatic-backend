@@ -1,12 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const Director = require('../models/director')
-const Cast = require('../models/cast')
+const Person = require('../models/person')
 
 router.post("/add-director", async (req, res) => {
     try {
       const { name, dob, img, desc } = req.body
-      let director = new Director({
+      let director = new Person({
         name,dob,img,desc
       })
       let savedDirector = await director.save()
@@ -19,7 +18,7 @@ router.post("/add-director", async (req, res) => {
 router.post("/add-cast", async (req, res) => {
     try {
       const { name, dob, img, desc } = req.body
-      let cast = new Cast({
+      let cast = new Person({
         name, dob, img, desc
       })
       let savedCast = await cast.save()

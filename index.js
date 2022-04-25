@@ -14,6 +14,8 @@ app.use(fileUpload({ useTempFiles : true,}));
 
 app.use('/api/getcontent',require('./routes/fetchContent'))
 app.use('/api/addpeople',require('./routes/addPeople'))
+app.use('/api/addcontent',require('./routes/addContent'))
+app.use('/api/storecontent',require('./routes/storeContent'))
 app.use('/api/uploadimg',require('./routes/testing'))
 
 app.get('/', (req, res)=>{
