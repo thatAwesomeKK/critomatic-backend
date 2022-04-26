@@ -18,7 +18,7 @@ router.get("/get-slider-image", async (req, res) => {
 //Get All the Movies to be Displayed
 router.get("/get-movies", async (req, res) => {
   try {
-    let movie = await Movie.find({}).select('slug title summary bgimg releaseDate');
+    let movie = await Movie.find({approved: true}).select('slug title summary bgimg releaseDate');
     return res.status(200).json(movie);
   } catch (error) {
     return res.status(500).json(error);

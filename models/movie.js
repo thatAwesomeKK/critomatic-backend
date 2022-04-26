@@ -44,11 +44,13 @@ const movieSchema = new Schema({
         type: String,
         required: true
     },
-    video:[
-        {
-            type: Object,
-        }
-    ]
+    video: [{
+        type: Object,
+    }],
+    approved:{
+        type: Boolean,
+        default: false,
+    }
 }, { timestamps: true })
 
 module.exports = mongoose.model('movie', movieSchema)
