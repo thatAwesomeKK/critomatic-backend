@@ -6,38 +6,47 @@ const showSchema = new Schema({
         type: String,
         required: true
     },
-    releasedate:{
+    titleposter: {
         type: String,
         required: true
     },
-    tilldate:{
+    bgimg: {
         type: String,
         required: true
     },
-    ottplatform:{
-        required: String,
-        required: true
-    },
-    season:{
-        required: String,
-        required: true
-    },
-    episodecount:{
-        required: String,
-        required: true
-    },
-    genre: {
+    crew: [{
+        crewID: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'person'
+        },
+        job: {
+            type: String,
+        }
+    }],
+    cast: [{
+        castID: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'person'
+        },
+        playing: {
+            type: String
+        }
+    }],
+    genre: [{
         type: String,
         required: true
-    },
-    rating: {
-        type: string,
-        required: true
-    },
+    }],
     summary: {
-        type: string,
+        type: String,
         required: true
     },
-}, {timestamps: true})
+    AirDate: {
+        type: String,
+        required: true
+    },
+    video: [{
+        type: Object,
+    }],
+}, { timestamps: true })
 
 module.exports = mongoose.model('show', showSchema)

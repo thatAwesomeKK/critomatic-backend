@@ -6,6 +6,11 @@ const movieSchema = new Schema({
         type: String,
         required: true
     },
+    slug: {
+        type: String,
+        required: true,
+        unique: true
+    },
     titleposter: {
         type: String,
         required: true
@@ -44,12 +49,33 @@ const movieSchema = new Schema({
         type: String,
         required: true
     },
+    boxoffice: {
+        type: String,
+    },
+    platform: {
+        type: String,
+    },
+    duration: {
+        type: String,
+    },
+    userRating: {
+        type: Number,
+    },
+    adminRating: {
+        rating: {
+            type: Number,
+        },
+        review: {
+            type: String
+        }
+    },
     video: [{
         type: Object,
     }],
-    approved:{
+    approved: {
         type: Boolean,
-        default: false,
+        required: true,
+        default: false
     }
 }, { timestamps: true })
 

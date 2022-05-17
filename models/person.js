@@ -4,7 +4,7 @@ const {Schema} = mongoose
 const personSchema = new Schema({
     name:{
         type: String,
-        required: true
+        default:"unknown"
     },
     img:{
         type: String,

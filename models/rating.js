@@ -4,13 +4,23 @@ const { Schema } = mongoose
 const ratingSchema = new Schema({
     movieID:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'movie'
+        ref: 'movie',
+        required: true
     },
-    rating: {
-        type: String,
+    userID:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+        required: true
     },
-    userrating: {
-        type: String,
+    userRating: {
+        rating:{
+            type: Number,
+            required: true
+        },
+        review:{
+            type: String,
+            required: true
+        }
     },
 }, { timestamps: true })
 
