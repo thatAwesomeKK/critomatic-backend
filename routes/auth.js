@@ -75,7 +75,7 @@ router.post('/login', [body("email", "Enter a Valid Email").isEmail(), body("pas
         let refreshToken = await getRefreshToken({ id: foundUser._id, tokenVersion: foundUser.tokenVersion });
 
         //setting refreshToken in Cookie
-        res.cookie("refreshToken", refreshToken, { httpOnly: true });
+        res.cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: 'none', secure: true  });
         return res.status(200).json({ success: true, accessToken: `Bearer ${accessToken}` });
     } catch (error) {
         return res.status(500).json({ success: false, error: "Internal Server Error" })

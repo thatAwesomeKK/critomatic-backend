@@ -10,7 +10,7 @@ const fileUpload = require('express-fileupload')
 
 app.use(cors({
     origin: process.env.CLIENT_URL,
-    credentials: true
+    credentials: true,
 }))
 // app.use(cors({
 //     origin: "http://localhost:3000",
