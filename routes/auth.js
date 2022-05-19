@@ -100,18 +100,18 @@ router.post("/verify-refresh", verifyRefreshToken, async (req, res) => {
     try {
         let user = await User.findById({ _id: req.verify.id });
         if (!user) {
-            res.clearCookie('refreshToken')
+            res.clearCookie('refreshToken', { sameSite: 'none', secure: true, httpOnly: true })
             return res.json({ success: false });
         }
         if (user.tokenVersion !== req.verify.tokenVersion) {
-            res.clearCookie('refreshToken')
+            res.clearCookie('refreshToken', { sameSite: 'none', secure: true, httpOnly: true })
             return res.json({ success: false, error: "Token Error" });
         }
         let accessToken = await getAccessToken({ id: req.verify.id });
         res.cookie("refreshToken", await getRefreshToken({ id: req.verify.id, tokenVersion: user.tokenVersion }), cookieConfig);
         return res.json({ success: true, accessToken: `Bearer ${accessToken}` });
     } catch (error) {
-        res.clearCookie('refreshToken');
+        res.clearCookie('refreshToken', { sameSite: 'none', secure: true, httpOnly: true });
         return res.status(500).json({ success: false, error: error })
     }
 });

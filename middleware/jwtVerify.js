@@ -11,7 +11,7 @@ const verifyRefreshToken = async (req, res, next) => {
   try {
     req.verify = jwt.verify(token, jwtRefreshSecret);
   } catch (error) {
-    res.clearCookie('refreshToken')
+    res.clearCookie('refreshToken', { sameSite: 'none', secure: true, httpOnly: true })
     return res.status(401).json({ success: false, error: "Internal Server Error" });
   }
   next()
