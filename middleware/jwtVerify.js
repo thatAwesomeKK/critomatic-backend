@@ -4,28 +4,33 @@ const jwtAccessSecret = process.env.JWT_ACCESS_SECRET;
 
 //this function will verify refresh token
 const verifyRefreshToken = async (req, res, next) => {
-  let token = req.cookies.refreshToken;
+  let token = await req.cookies.refreshToken;
   if (!token) {
-    return res.json({ success: false, accessToken: "" });
+    return res.json({ success: false });
   }
   try {
     req.verify = jwt.verify(token, jwtRefreshSecret);
   } catch (error) {
-    return res.status(401).json({ error: "Internal Server Error" });
+    res.clearCookie('refreshToken')
+    return res.status(401).json({ success: false, error: "Internal Server Error" });
   }
   next()
 };
 
 //this function will verify access token
 const verifyAccessToken = async (req, res, next) => {
-  let token = req.body.accessToken.split(" ")[1]
-  if (!token) {
-    return res.json({ success: false, accessToken: "" });
-  }
   try {
-    req.verify = jwt.verify(token, jwtAccessSecret);
+    let token = req.body.accessToken.split(" ")[1]
+    if (!token) {
+      return res.json({ success: false });
+    }
+    try {
+      req.verify = jwt.verify(token, jwtAccessSecret);
+    } catch (error) {
+      return res.status(401).json({ success: false, error: "Internal Server Error" });
+    }
   } catch (error) {
-    return res.status(401).json({ error: "Internal Server Error" });
+    return res.status(400).json({ success: false, error: "Internal Server Error" });
   }
   next()
 };
