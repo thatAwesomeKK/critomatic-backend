@@ -4,7 +4,9 @@ const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const User = require('../models/user')
 const { getAccessToken, getRefreshToken } = require("../methods/jwtCreation");
-const { verifyRefreshToken, verifyAccessToken } = require('../middleware/jwtVerify')
+const { verifyRefreshToken } = require('../middleware/jwtVerify')
+
+const cookieConfig = {httpOnly: true, sameSite: 'none', secure: true}
 
 //Endpoint for Registering /api/auth/register
 router.post('/register', [body("email", "Enter a Valid Email").isEmail(),
@@ -75,7 +77,7 @@ router.post('/login', [body("email", "Enter a Valid Email").isEmail(), body("pas
         let refreshToken = await getRefreshToken({ id: foundUser._id, tokenVersion: foundUser.tokenVersion });
 
         //setting refreshToken in Cookie
-        res.cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: 'none', secure: true  });
+        res.cookie("refreshToken", refreshToken, cookieConfig);
         return res.status(200).json({ success: true, accessToken: `Bearer ${accessToken}` });
     } catch (error) {
         return res.status(500).json({ success: false, error: "Internal Server Error" })
@@ -106,7 +108,7 @@ router.post("/verify-refresh", verifyRefreshToken, async (req, res) => {
             return res.json({ success: false, error: "Token Error" });
         }
         let accessToken = await getAccessToken({ id: req.verify.id });
-        res.cookie("refreshToken", await getRefreshToken({ id: req.verify.id, tokenVersion: user.tokenVersion }), { httpOnly: true });
+        res.cookie("refreshToken", await getRefreshToken({ id: req.verify.id, tokenVersion: user.tokenVersion }), cookieConfig);
         return res.json({ success: true, accessToken: `Bearer ${accessToken}` });
     } catch (error) {
         res.clearCookie('refreshToken')
@@ -124,7 +126,7 @@ router.post("/token-version", async (req, res) => {
         }
         await User.findByIdAndUpdate({ _id: user._id }, { tokenVersion: user.tokenVersion + 1 })
         let refreshToken = await getRefreshToken({ id: user._id, tokenVersion: user.tokenVersion + 1 })
-        res.cookie("refreshToken", refreshToken, { httpOnly: true });
+        res.cookie("refreshToken", refreshToken, cookieConfig);
         return res.json({ success: true });
     } catch (error) {
         return res.status(500).json({ success: false, error: error })
