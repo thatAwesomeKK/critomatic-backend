@@ -6,7 +6,7 @@ const User = require('../models/user')
 const { getAccessToken, getRefreshToken } = require("../methods/jwtCreation");
 const { verifyRefreshToken } = require('../middleware/jwtVerify')
 
-const cookieConfig = {httpOnly: true, sameSite: 'none', secure: true}
+const cookieConfig = { httpOnly: true, sameSite: 'none', secure: true }
 
 //Endpoint for Registering /api/auth/register
 router.post('/register', [body("email", "Enter a Valid Email").isEmail(),
@@ -88,7 +88,7 @@ router.post('/login', [body("email", "Enter a Valid Email").isEmail(), body("pas
 router.post('/logout', async (req, res) => {
     try {
         //Clearing Cookies on Client
-        res.clearCookie('refreshToken', cookieConfig);
+        res.clearCookie('refreshToken', { sameSite: 'none', secure: true, httpOnly: true });
         return res.json({ success: true });
     } catch (error) {
         return res.status(500).json({ success: false, error: error })
