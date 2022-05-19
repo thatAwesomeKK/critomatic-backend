@@ -88,7 +88,7 @@ router.post('/login', [body("email", "Enter a Valid Email").isEmail(), body("pas
 router.post('/logout', async (req, res) => {
     try {
         //Clearing Cookies on Client
-        res.clearCookie('refreshToken')
+        res.clearCookie('refreshToken', cookieConfig);
         return res.json({ success: true });
     } catch (error) {
         return res.status(500).json({ success: false, error: error })
@@ -111,7 +111,7 @@ router.post("/verify-refresh", verifyRefreshToken, async (req, res) => {
         res.cookie("refreshToken", await getRefreshToken({ id: req.verify.id, tokenVersion: user.tokenVersion }), cookieConfig);
         return res.json({ success: true, accessToken: `Bearer ${accessToken}` });
     } catch (error) {
-        res.clearCookie('refreshToken')
+        res.clearCookie('refreshToken');
         return res.status(500).json({ success: false, error: error })
     }
 });
