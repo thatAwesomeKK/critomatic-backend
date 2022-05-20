@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { verifyAccessToken } = require("../middleware/jwtVerify");
 const userPerms = require("../middleware/usePerms");
-const Movies = require('../models/movie')
+const Movie = require('../models/movie')
 const fetchUser = require('../middleware/fetchUser')
 const scopedRatings = require('../methods/scopedRatings')
 const Rating = require('../models/rating');
@@ -10,7 +10,7 @@ const User = require("../models/user");
 
 router.post('/get-content', verifyAccessToken, userPerms('isAdmin'), async (req, res) => {
     try {
-        let movies = await Movies.find({})
+        let movies = await Movie.find({})
         res.status(200).json({ success: true, movie: movies })
     } catch (error) {
         res.status(401).json({ success: false, error: error })
@@ -19,7 +19,7 @@ router.post('/get-content', verifyAccessToken, userPerms('isAdmin'), async (req,
 
 router.post('/get-profile', verifyAccessToken, fetchUser, async (req, res) => {
     try {
-        const user = await User.findById({ _id: req.verify.id }).select('email username')
+        const user = await User.findById({ _id: req.verify.id }).select('email username role')
         res.status(200).json({ success: true, user })
     } catch (error) {
         res.status(401).json({ success: false, error: error })

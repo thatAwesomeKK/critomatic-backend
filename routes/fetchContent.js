@@ -24,6 +24,16 @@ router.get("/get-movies", async (req, res) => {
   }
 });
 
+router.post("/movie-update", async (req, res) => {
+  let movieID = req.body.movieID
+  try {
+    let movie = await Movie.findById({_id: movieID}).select('title boxoffice platform duration adminRating approved'); 
+    return res.status(200).json(movie);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+});
+
 //Get Single Movie with the Slug
 router.get("/get-movie", async (req, res) => {
   try {

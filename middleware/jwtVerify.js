@@ -24,13 +24,9 @@ const verifyAccessToken = async (req, res, next) => {
     if (!token) {
       return res.json({ success: false });
     }
-    try {
-      req.verify = jwt.verify(token, jwtAccessSecret);
-    } catch (error) {
-      return res.status(401).json({ success: false, error: "Not Authorized" });
-    }
+    req.verify = jwt.verify(token, jwtAccessSecret);
   } catch (error) {
-    return res.status(400).json({ success: false, error: "Internal Server Error" });
+    return res.status(401).json({ success: false, error: "Not Authorized" });
   }
   next()
 };

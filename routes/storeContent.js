@@ -11,6 +11,8 @@ const genres = require("../methods/genre");
 const Rating = require('../models/rating')
 const Show = require('../models/show');
 const ShowInfo = require("../models/showInfo");
+const { verifyAccessToken } = require("../middleware/jwtVerify");
+const userPerms = require("../middleware/usePerms");
 
 const job = schedule.scheduleJob('0 0 * * THU', async () => {
   let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&with_watch_monetization_types=flatrate`
@@ -224,7 +226,7 @@ const job2 = schedule.scheduleJob('0 0 * * THU', async () => {
 });
 
 
-router.put("/movie-info", async (req, res) => {
+router.put("/movie-info", verifyAccessToken, userPerms("isAdmin"), async (req, res) => {
   try {
     const { movieName, boxoffice, platform, duration, adminRating, adminReview, approved } = req.body
 
@@ -241,10 +243,10 @@ router.put("/movie-info", async (req, res) => {
     if (adminRating && adminReview) { newMovie.adminRating = { rating: adminRating, review: adminReview } }
     if (approved) { newMovie.approved = approved }
 
-    let updatedMovie = await Movie.findByIdAndUpdate(foundMovie._id, { $set: newMovie }, { new: true })
-    return res.status(200).json(updatedMovie);
+    await Movie.findByIdAndUpdate(foundMovie._id, { $set: newMovie }, { new: true })
+    return res.status(200).json({success: true, message: "Updated Successfully!"});
   } catch (error) {
-    return res.status(500).json(error);
+    return res.status(500).json({success: false, error: "Internal Server Error"});
   }
 });
 
