@@ -74,7 +74,15 @@ const genres = [
       {
         "id": 37,
         "name": "Western"
-      }
+      },
+      {
+        "id": 10765,
+        "name": "Sci-Fi & Fantasy"
+      },
+      {
+        "id": 10759,
+        "name": "Action & Adventure"
+      },
     ]
 
 module.exports = genres    

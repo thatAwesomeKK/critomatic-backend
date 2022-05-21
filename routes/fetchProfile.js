@@ -7,11 +7,21 @@ const fetchUser = require('../middleware/fetchUser')
 const scopedRatings = require('../methods/scopedRatings')
 const Rating = require('../models/rating');
 const User = require("../models/user");
+const Show = require("../models/show");
 
-router.post('/get-content', verifyAccessToken, userPerms('isAdmin'), async (req, res) => {
+router.post('/get-movies', verifyAccessToken, userPerms('isAdmin'), async (req, res) => {
     try {
         let movies = await Movie.find({})
-        res.status(200).json({ success: true, movie: movies })
+        res.status(200).json({ success: true, content: movies })
+    } catch (error) {
+        res.status(401).json({ success: false, error: error })
+    }
+})
+
+router.post('/get-shows', verifyAccessToken, userPerms('isAdmin'), async (req, res) => {
+    try {
+        let shows = await Show.find({})
+        res.status(200).json({ success: true, content: shows })
     } catch (error) {
         res.status(401).json({ success: false, error: error })
     }

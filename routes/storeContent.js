@@ -8,9 +8,7 @@ const slugify = require('slugify')
 const Movie = require('../models/movie')
 const Person = require('../models/person');
 const genres = require("../methods/genre");
-const Rating = require('../models/rating')
 const Show = require('../models/show');
-const ShowInfo = require("../models/showInfo");
 const { verifyAccessToken } = require("../middleware/jwtVerify");
 const userPerms = require("../middleware/usePerms");
 
@@ -113,124 +111,118 @@ const job = schedule.scheduleJob('0 0 * * THU', async () => {
 
 
 const job2 = schedule.scheduleJob('0 0 * * THU', async () => {
-  let url = `https://api.themoviedb.org/3/trending/tv/week?api_key=${apiKey}`
+  try {
 
-  let showResponse = await fetch(url, {
-    method: "GET",
-    header: {
-      "Content-Type": "application/json",
-    }
-  })
-  let showJson = await showResponse.json();
 
-  showJson.results.forEach(async (show) => {
-    let showID = await Show.findOne({ title: show.name || show.original_name })
-    if (!showID && show.backdrop_path) {
-      let creditsUrl = `https://api.themoviedb.org/3/tv/${show.id}/aggregate_credits?api_key=${apiKey}&language=en-US`
+    let url = `https://api.themoviedb.org/3/trending/tv/week?api_key=${apiKey}`
 
-      let creditsResponse = await fetch(creditsUrl, {
-        method: "GET",
-        header: {
-          "Content-Type": "application/json",
-        }
-      })
-      let creditsJson = await creditsResponse.json()
+    let showResponse = await axios(url)
+    let showJson = await showResponse.data;
 
-      let castID = []
-      for (let i = 0; i < 5; i++) {
-        const element = await creditsJson.cast[i];
-        if (!element) {
-          continue
-        }
-        let name = element.original_name || element.name
-        let cast = await Person.findOne({ name: name })
-        if (!cast) {
-          let person = new Person({
-            name: name,
-            img: element.profile_path
-          })
-          let savedCast = await person.save()
-          castID.push({ castID: savedCast._id, playing: element.character })
-        } else {
-          castID.push({ castID: cast._id, playing: element.character })
-        }
-      }
+    showJson.results.forEach(async (show) => {
+      let showID = await Show.findOne({ title: show.name || show.original_name })
+      if (!showID && show.backdrop_path) {
+        let creditsUrl = `https://api.themoviedb.org/3/tv/${show.id}/credits?api_key=${apiKey}&language=en-US`
 
-      let crewID = []
-      for (let i = 0; i < creditsJson.crew.length; i++) {
-        const element = await creditsJson.crew[i];
-        if (!element) {
-          continue
-        }
-        let name = element.name || element.original_name
-        let crew = await Person.findOne({ name: name })
-        if (!crew) {
-          if (element.department === 'Writing' || element.department === 'Directing' || element.department === 'Visual Effects') {
+        let slug = await slugify(show.name || show.original_name, {
+          lower: true
+        })
+
+        let creditsResponse = await axios.get(creditsUrl)
+        let creditsJson = await creditsResponse.data
+
+        let castID = []
+        for (let i = 0; i < 10; i++) {
+          const element = await creditsJson.cast[i];
+          if (!element) {
+            continue
+          }
+          let name = await element.original_name || element.name
+          let cast = await Person.findOne({ name })
+          if (!cast) {
             let person = new Person({
               name: name,
               img: element.profile_path
             })
-            let savedCrew = await person.save()
-            crewID.push({ crewID: savedCrew._id, job: element.job })
-          }
-        } else {
-          if (element.department === 'Writing' || element.department === 'Directing' || element.department === 'Visual Effects') {
-            crewID.push({ crewID: crew._id, job: element.job })
+            let savedCast = await person.save()
+            castID.push({ castID: savedCast._id, playing: element.character })
+          } else {
+            castID.push({ castID: cast._id, playing: element.character })
           }
         }
-      }
-      for (let i = 0; i < show.genre_ids.length; i++) {
-        for (let j = 0; j < genres.length; j++) {
-          const elemental = show.genre_ids[i];
-          const element = genres[j];
-          if (elemental === element.id) {
-            show.genre_ids[i] = element.name
+
+        let crewID = []
+        for (let i = 0; i < creditsJson.crew.length; i++) {
+          const element = await creditsJson.crew[i];
+          if (!element) {
+            continue
+          }
+          let name = element.name || element.original_name
+          let crew = await Person.findOne({ name: name })
+          if (!crew) {
+            if (element.department === 'Writing' || element.department === 'Directing' || element.department === 'Visual Effects') {
+              let person = new Person({
+                name: name,
+                img: element.profile_path
+              })
+              let savedCrew = await person.save()
+              crewID.push({ crewID: savedCrew._id, job: element.job })
+            }
+          } else {
+            if (element.department === 'Writing' || element.department === 'Directing' || element.department === 'Visual Effects') {
+              crewID.push({ crewID: crew._id, job: element.job })
+            }
           }
         }
-      }
-
-      let clipsUrl = `https://api.themoviedb.org/3/tv/${show.id}/videos?api_key=${apiKey}&language=en-US`
-
-      let clipsResponse = await fetch(clipsUrl, {
-        method: "GET",
-        header: {
-          "Content-Type": "application/json",
+        for (let i = 0; i < show.genre_ids.length; i++) {
+          for (let j = 0; j < genres.length; j++) {
+            const elemental = show.genre_ids[i];
+            const element = genres[j];
+            if (elemental === element.id) {
+              show.genre_ids[i] = element.name
+            }
+          }
         }
-      })
-      let clipsJson = await clipsResponse.json();
-      let clips = []
-      if (clipsJson) {
-        for (let i = 0; i < clipsJson.results.length; i++) {
-          const element = await clipsJson.results[i];
-          let vidLink = 'https://www.youtube.com/watch?v=' + element.key
-          await clips.push(vidLink)
-        }
-      }
 
-      let saveShow = new Show({
-        title: show.title || show.original_name,
-        titleposter: show.poster_path,
-        bgimg: show.backdrop_path,
-        genre: show.genre_ids,
-        crew: crewID,
-        cast: castID,
-        summary: show.overview,
-        AirDate: show.first_air_date,
-        video: clips
-      })
-      let savedShow = await saveShow.save()
-      console.log(savedShow);
-    }
-  })
-  return
+        let clipsUrl = `https://api.themoviedb.org/3/tv/${show.id}/videos?api_key=${apiKey}&language=en-US`
+
+        let clipsResponse = await axios.get(clipsUrl)
+        let clipsJson = await clipsResponse.data;
+        let clips = []
+        if (clipsJson) {
+          for (let i = 0; i < clipsJson.results.length; i++) {
+            const element = await clipsJson.results[i];
+            let vidLink = 'https://www.youtube.com/watch?v=' + element.key
+            await clips.push(vidLink)
+          }
+        }
+
+        let saveShow = new Show({
+          title: show.title || show.original_name,
+          slug,
+          titleposter: show.poster_path,
+          bgimg: show.backdrop_path,
+          genre: show.genre_ids,
+          cast: castID,
+          summary: show.overview,
+          AirDate: show.first_air_date,
+          video: clips
+        })
+        let savedShow = await saveShow.save();
+      }
+    })
+    return
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 
 router.put("/movie-info", verifyAccessToken, userPerms("isAdmin"), async (req, res) => {
   try {
-    const { movieName, boxoffice, platform, duration, adminRating, adminReview, approved } = req.body
+    const { contentName, boxoffice, platform, duration, adminRating, adminReview, approved } = req.body
 
-    let foundMovie = await Movie.findOne({ title: movieName })
+    let foundMovie = await Movie.findOne({ title: contentName })
 
     if (!foundMovie) {
       return res.status(500).json({ error: 'Movie Not Found' });
@@ -244,42 +236,44 @@ router.put("/movie-info", verifyAccessToken, userPerms("isAdmin"), async (req, r
     if (approved) { newMovie.approved = approved }
 
     await Movie.findByIdAndUpdate(foundMovie._id, { $set: newMovie }, { new: true })
-    return res.status(200).json({success: true, message: "Updated Successfully!"});
+    return res.status(200).json({ success: true, message: "Updated Successfully!" });
   } catch (error) {
-    return res.status(500).json({success: false, error: "Internal Server Error"});
+    return res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 });
 
 
 
-router.post("/show-info", async (req, res) => {
+router.put("/show-info",verifyAccessToken, userPerms("isAdmin"), async (req, res) => {
   try {
-    const { showName, platform, episodeNo, name, rate, review } = req.body
-    console.log(req.body);
+    const { contentName, platform, episodes, adminRating, adminReview, approved, crewNames } = req.body
 
-    let foundShow = await Show.findOne({ title: showName }).select('_id')
+    let foundShow = await Show.findOne({ title: contentName })
 
     if (!foundShow) {
-      return res.status(500).json({ error: 'Movie Not Found' });
+      return res.status(500).json({ error: 'Show Not Found' });
     }
 
-    let slug = await slugify(showName, {
-      lower: true
-    })
+    let crew = []
+    let crews = crewNames || []
+    for (let i = 0; i < crews.length ; i++) {
+      const element = crews[i];
+      let foundPerson = await Person.findOne({ name: element.name })
+      crew.push({ crewID: foundPerson._id, job: element.job })
+    }
 
-    let show = new ShowInfo({
-      showID: foundShow._id,
-      slug: slug + episodeNo,
-      platform,
-      episode: { number: episodeNo, name: name },
-      adminRating: { rate: rate, review: review }
-    })
+    let newShows = {}
+    if (episodes) { newShows.episodes = episodes }
+    if (platform) { newShows.platform = platform }
+    if (crewNames) { newShows.crew = crew }
+    if (adminRating && adminReview) { newShows.adminRating = { rating: adminRating, review: adminReview } }
+    if (approved) { newShows.approved = approved }
 
-    let savedShow = await show.save()
-    return res.status(200).json(savedShow);
+    await Show.findByIdAndUpdate(foundShow._id, { $set: newShows }, { new: true })
+    return res.status(200).json({ success: true, message: "Updated Successfully!" });
   } catch (error) {
     console.log(error);
-    return res.status(500).json("Server Error");
+    return res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 });
 

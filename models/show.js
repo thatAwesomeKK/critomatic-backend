@@ -6,6 +6,29 @@ const showSchema = new Schema({
         type: String,
         required: true
     },
+    slug: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    platform: {
+        type: String,
+    },
+    userRating: {
+        type: Number,
+        default: 0
+    },
+    episodes: {
+        type: Number,
+    },
+    adminRating: {
+        rating: {
+            type: Number,
+        },
+        review: {
+            type: String,
+        }
+    },
     titleposter: {
         type: String,
         required: true
@@ -47,6 +70,11 @@ const showSchema = new Schema({
     video: [{
         type: Object,
     }],
+    approved: {
+        type: Boolean,
+        required: true,
+        default: false
+    }
 }, { timestamps: true })
 
 module.exports = mongoose.model('show', showSchema)
