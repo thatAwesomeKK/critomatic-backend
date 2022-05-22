@@ -233,7 +233,7 @@ router.put("/movie-info", verifyAccessToken, userPerms("isAdmin"), async (req, r
     if (platform) { newMovie.platform = platform }
     if (duration) { newMovie.duration = duration }
     if (adminRating && adminReview) { newMovie.adminRating = { rating: adminRating, review: adminReview } }
-    if (approved) { newMovie.approved = approved }
+    newMovie.approved = approved
 
     await Movie.findByIdAndUpdate(foundMovie._id, { $set: newMovie }, { new: true })
     return res.status(200).json({ success: true, message: "Updated Successfully!" });
@@ -244,7 +244,7 @@ router.put("/movie-info", verifyAccessToken, userPerms("isAdmin"), async (req, r
 
 
 
-router.put("/show-info",verifyAccessToken, userPerms("isAdmin"), async (req, res) => {
+router.put("/show-info", verifyAccessToken, userPerms("isAdmin"), async (req, res) => {
   try {
     const { contentName, platform, episodes, adminRating, adminReview, approved, crewNames } = req.body
 
@@ -256,7 +256,7 @@ router.put("/show-info",verifyAccessToken, userPerms("isAdmin"), async (req, res
 
     let crew = []
     let crews = crewNames || []
-    for (let i = 0; i < crews.length ; i++) {
+    for (let i = 0; i < crews.length; i++) {
       const element = crews[i];
       let foundPerson = await Person.findOne({ name: element.name })
       crew.push({ crewID: foundPerson._id, job: element.job })
