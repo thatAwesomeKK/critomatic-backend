@@ -4,11 +4,12 @@ const { verifyAccessToken } = require("../middleware/jwtVerify");
 const userPerms = require("../middleware/usePerms");
 const Movie = require('../models/movie')
 const fetchUser = require('../middleware/fetchUser')
-const scopedRatings = require('../methods/scopedRatings')
+const showRating = require('../models/showRatings')
 const Rating = require('../models/rating');
 const User = require("../models/user");
 const Show = require("../models/show");
 
+//Get the movies on the Admin Panel
 router.post('/get-movies', verifyAccessToken, userPerms('isAdmin'), async (req, res) => {
     try {
         let movies = await Movie.find({})
@@ -18,6 +19,7 @@ router.post('/get-movies', verifyAccessToken, userPerms('isAdmin'), async (req, 
     }
 })
 
+//Get the Tv Shows on the Admin Panel
 router.post('/get-shows', verifyAccessToken, userPerms('isAdmin'), async (req, res) => {
     try {
         let shows = await Show.find({})
@@ -27,6 +29,7 @@ router.post('/get-shows', verifyAccessToken, userPerms('isAdmin'), async (req, r
     }
 })
 
+//Fetch the users Profile
 router.post('/get-profile', verifyAccessToken, fetchUser, async (req, res) => {
     try {
         const user = await User.findById({ _id: req.verify.id }).select('email username role')
@@ -36,9 +39,15 @@ router.post('/get-profile', verifyAccessToken, fetchUser, async (req, res) => {
     }
 })
 
-router.post('/get-ratings', verifyAccessToken, fetchUser, async (req, res) => {
-    let rating = await Rating.find({ userID: req.user._id })
-    res.json({ success: true, ratings: await scopedRatings(req.user, rating) })
+router.post('/get-ratings', verifyAccessToken, async (req, res) => {
+    try {
+        let movieRatings = await Rating.find({ userID: req.verify.id }).populate({ path: 'movieID', model: Movie, select: 'title' })
+        let showRatings = await showRating.find({ userID: req.verify.id }).populate({ path: 'showID', model: Show, select: 'title' })
+
+        res.json({ success: true, movieRatings, showRatings })
+    } catch (error) {
+        res.status(401).json({ success: false, error: "Internal Server Error" })
+    }
 })
 
 

@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const axios = require('axios').default;
 const schedule = require('node-schedule');
-const fetch = require("node-fetch");
 const apiKey = process.env.TMDB_API_KEY
 const slugify = require('slugify')
 const Movie = require('../models/movie')

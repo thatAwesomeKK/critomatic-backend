@@ -3,13 +3,46 @@ const router = express.Router();
 const Slider = require('../models/homeslider')
 const Movie = require('../models/movie')
 const Person = require('../models/person')
-const Rating = require("../models/rating");
 const Show = require("../models/show");
 
+//Get the Slider Image
 router.get("/get-slider-image", async (req, res) => {
+  let images = []
   try {
-    let news = await Slider.find({});
-    return res.status(200).json(news);
+    let movies = await Movie.find({approved: true}).select('bgimg')
+    let shows = await Show.find({approved: true}).select('bgimg')
+
+    movies.forEach((element)=>{
+      images.push(`https://image.tmdb.org/t/p/original${element.bgimg}`)
+    })
+
+    shows.forEach(async (element)=>{
+      images.push(`https://image.tmdb.org/t/p/original${element.bgimg}`)
+    })
+
+    return res.status(200).json(images);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+});
+
+router.get("/get-category-image", async (req, res) => {
+
+  let moviePoster = []
+  let showPoster = []
+  try {
+    let movies = await Movie.find({approved: true}).select('titleposter')
+    let shows = await Show.find({approved: true}).select('titleposter')
+
+    movies.forEach((element)=>{
+      moviePoster.push(`https://image.tmdb.org/t/p/w500${element.titleposter}`)
+    })
+
+    shows.forEach(async (element)=>{
+      showPoster.push(`https://image.tmdb.org/t/p/w500${element.titleposter}`)
+    })
+
+    return res.status(200).json({movie: moviePoster, show: showPoster});
   } catch (error) {
     return res.status(500).json(error);
   }
@@ -25,6 +58,7 @@ router.get("/get-movies", async (req, res) => {
   }
 });
 
+//Get All the Tv Shows to be Displayed
 router.get("/get-shows", async (req, res) => {
   try {
     let show = await Show.find({approved: true}).select('title slug bgimg AirDate summary'); 
@@ -34,6 +68,7 @@ router.get("/get-shows", async (req, res) => {
   }
 });
 
+//Get All the Movie Info that need to be Updated
 router.post("/movie-update", async (req, res) => {
   let movieID = req.body.contentID
   try {
@@ -44,6 +79,7 @@ router.post("/movie-update", async (req, res) => {
   }
 });
 
+//Get all the Tv Show Info that need to Updated
 router.post("/show-update", async (req, res) => {
   let showID = req.body.contentID
   try {
@@ -64,6 +100,7 @@ router.get("/get-movie", async (req, res) => {
   }
 });
 
+//get Single Tv Show with the Slug
 router.get("/get-show", async (req, res) => {
   try {
     let show = await Show.findOne({ slug: req.query.slug }).populate({path: 'crew.crewID', model: Person, select:'name img'}).populate({path: 'cast.castID', model: Person, select:'name img'})

@@ -4,7 +4,9 @@ const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const User = require('../models/user')
 const { getAccessToken, getRefreshToken } = require("../methods/jwtCreation");
-const { verifyRefreshToken } = require('../middleware/jwtVerify')
+const { verifyRefreshToken, verifyAccessToken } = require('../middleware/jwtVerify');
+const fetchUser = require("../middleware/fetchUser");
+const { cloudinary } = require("../cloudinary");
 
 const cookieConfig = { httpOnly: true, sameSite: 'none', secure: true }
 
@@ -133,6 +135,36 @@ router.post("/token-version", async (req, res) => {
     }
 });
 
+router.put("/update-user", verifyAccessToken, fetchUser, async (req, res) => {
+    try {
+        const { pfpBase64, username } = req.body
+        const user = req.user
 
+        if (!user) {
+            return res.status(400).json({ success: false, error: "No User" })
+        }
+
+        let pfp = ""
+        if (pfpBase64) {
+            await cloudinary.uploader.upload(pfpBase64, (err, result) => {
+                if (err) {
+                    console.log(error);
+                }
+                console.log(result.secure_url);
+                pfp = result.secure_url
+            })
+        }
+
+
+        const newUser = {}
+        if (pfp) { newUser.pfp = pfp }
+        if (username) { newUser.username = username }
+
+        await User.findByIdAndUpdate(req.user._id, { $set: newUser }, { new: true })
+        return res.status(200).json({ success: true, message: "Updated Successfully!" });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: "Internal Server Error" });
+    }
+})
 
 module.exports = router

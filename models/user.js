@@ -2,6 +2,9 @@ const mongoose = require('mongoose')
 const {Schema} = mongoose
 
 const userSchema = new Schema({
+    pfp:{
+        type: 'string',
+    },
     username:{
         type: String,
         required: true
