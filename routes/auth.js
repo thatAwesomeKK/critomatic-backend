@@ -8,7 +8,7 @@ const { verifyRefreshToken, verifyAccessToken } = require('../middleware/jwtVeri
 const fetchUser = require("../middleware/fetchUser");
 const { cloudinary } = require("../cloudinary");
 
-const cookieConfig = { httpOnly: true, sameSite: 'none', secure: true, domain: '.vercel.app' }
+const cookieConfig = { httpOnly: true, sameSite: 'none', secure: true, domain: 'https://critomatic-frontend.vercel.app' }
 
 //Endpoint for Registering /api/auth/register
 router.post('/register', [body("email", "Enter a Valid Email").isEmail(),
