@@ -6,7 +6,7 @@ const jwtAccessSecret = process.env.JWT_ACCESS_SECRET;
 const verifyRefreshToken = async (req, res, next) => {
   let token = await req.cookies.refreshToken;
   if (!token) {
-    return res.json({ success: false });
+    return res.json({ success: false, error: "Token Invalid" });
   }
   try {
     req.verify = jwt.verify(token, jwtRefreshSecret);
@@ -20,7 +20,7 @@ const verifyRefreshToken = async (req, res, next) => {
 //this function will verify access token
 const verifyAccessToken = async (req, res, next) => {
   try {
-    let token = req.body.accessToken.split(" ")[1]
+    let token = req.headers.accesstoken.split(" ")[1]
     if (!token) {
       return res.json({ success: false });
     }
