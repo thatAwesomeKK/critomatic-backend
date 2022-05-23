@@ -140,24 +140,26 @@ router.put("/update-user", verifyAccessToken, fetchUser, async (req, res) => {
         const { pfpBase64, username } = req.body
         const user = req.user
 
+        //Checking if user Exists
         if (!user) {
             return res.status(400).json({ success: false, error: "No User" })
         }
 
+        //Uploading the pfp
         let pfp = ""
+        let response = ""
         if (pfpBase64) {
-            await cloudinary.uploader.upload(pfpBase64, (err, result) => {
-                if (err) {
-                    console.log(error);
-                }
-                console.log(result.secure_url);
-                pfp = result.secure_url
-            })
+
+            pfp = `data:image/png;base64,${pfpBase64}`
+
+            response = await cloudinary.uploader.upload(pfp, {
+                upload_preset: "profile_pics"
+            });
         }
 
-
+        //Making New User
         const newUser = {}
-        if (pfp) { newUser.pfp = pfp }
+        if (pfp) { newUser.pfp = response.secure_url }
         if (username) { newUser.username = username }
 
         await User.findByIdAndUpdate(req.user._id, { $set: newUser }, { new: true })

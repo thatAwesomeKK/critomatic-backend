@@ -35,7 +35,7 @@ router.post('/add-show', verifyAccessToken, async (req, res) => {
         const { contentID, rate, review } = req.body
         const userID = req.verify.id
 
-        let savedShowUser = await showRatings.findOne({ contentID, userID })
+        let savedShowUser = await showRatings.findOne({ showID: contentID, userID })
         if (savedShowUser) {
             return res.status(500).json({ success: false, error: "Rating Already Available" })
         }
@@ -58,7 +58,7 @@ router.get("/get", async (req, res) => {
     try {
         const movieID = req.headers.movieid
 
-        let ratings = await Rating.find({ movieID }).populate({ path: "userID", model: User, select: 'username' })
+        let ratings = await Rating.find({ movieID }).populate({ path: "userID", model: User, select: 'username pfp' })
         return res.status(200).json({ success: true, ratings })
     } catch (error) {
         return res.status(500).json({ success: false, error: "Internal Server Error" })
@@ -69,7 +69,7 @@ router.get("/get-show", async (req, res) => {
     try {
         const showID = req.headers.showid
 
-        let ratings = await showRatings.find({ showID }).populate({ path: "userID", model: User, select: 'username' })
+        let ratings = await showRatings.find({ showID }).populate({ path: "userID", model: User, select: 'username pfp' })
         return res.status(200).json({ success: true, ratings })
     } catch (error) {
         return res.status(500).json({ success: false, error: "Internal Server Error" })

@@ -32,7 +32,7 @@ router.post('/get-shows', verifyAccessToken, userPerms('isAdmin'), async (req, r
 //Fetch the users Profile
 router.post('/get-profile', verifyAccessToken, fetchUser, async (req, res) => {
     try {
-        const user = await User.findById({ _id: req.verify.id }).select('email username role')
+        const user = await User.findById({ _id: req.verify.id }).select('email username role pfp')
         res.status(200).json({ success: true, user })
     } catch (error) {
         res.status(401).json({ success: false, error: error })
