@@ -20,7 +20,7 @@ const verifyRefreshToken = async (req, res, next) => {
 //this function will verify access token
 const verifyAccessToken = async (req, res, next) => {
   try {
-    let token = req.headers.accesstoken.split(" ")[1]
+    let token = req.body.accessToken.split(" ")[1]
     if (!token) {
       return res.json({ success: false });
     }
