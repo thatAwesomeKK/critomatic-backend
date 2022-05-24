@@ -8,7 +8,7 @@ const { verifyRefreshToken, verifyAccessToken } = require('../middleware/jwtVeri
 const fetchUser = require("../middleware/fetchUser");
 const { cloudinary } = require("../cloudinary");
 
-const cookieConfig = { sameSite: 'none', secure: true, httpOnly: true, domain: ".critomatic.ml" }
+const cookieConfig = { sameSite: 'none', secure: true, httpOnly: true, domain: process.env.COOKIE_DOMAIN }
 
 //Endpoint for Registering /api/auth/register
 router.post('/register', [body("email", "Enter a Valid Email").isEmail(),
