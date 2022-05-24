@@ -8,7 +8,7 @@ const { verifyRefreshToken, verifyAccessToken } = require('../middleware/jwtVeri
 const fetchUser = require("../middleware/fetchUser");
 const { cloudinary } = require("../cloudinary");
 
-const cookieConfig = { sameSite: 'none', secure: true, httpOnly: true, domain: ".critomatic.ml" }
+const cookieConfig = { sameSite: 'none', secure: true, httpOnly: true }
 
 //Endpoint for Registering /api/auth/register
 router.post('/register', [body("email", "Enter a Valid Email").isEmail(),
@@ -52,7 +52,6 @@ body("password").isLength({ min: 5 })],
 
 //Endpoint for login /api/auth/login
 router.post('/login', [body("email", "Enter a Valid Email").isEmail(), body("password").isLength({ min: 5 })], async (req, res) => {
-    console.log(req.body);
 
     try {
         const { email, password } = req.body
@@ -78,7 +77,6 @@ router.post('/login', [body("email", "Enter a Valid Email").isEmail(), body("pas
 
         //generating refresh token
         let refreshToken = await getRefreshToken({ id: foundUser._id, tokenVersion: foundUser.tokenVersion });
-        console.log(refreshToken);
 
         //setting refreshToken in Cookie
         res.cookie("refreshToken", refreshToken, cookieConfig);
@@ -92,7 +90,7 @@ router.post('/login', [body("email", "Enter a Valid Email").isEmail(), body("pas
 router.post('/logout', async (req, res) => {
     try {
         //Clearing Cookies on Client
-        res.clearCookie('refreshToken', { sameSite: 'none', secure: true, httpOnly: true, domain: ".critomatic.ml" });
+        res.clearCookie('refreshToken', { sameSite: 'none', secure: true, httpOnly: true });
         return res.json({ success: true });
     } catch (error) {
         return res.status(500).json({ success: false, error: error })
