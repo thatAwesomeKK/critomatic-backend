@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { verifyAccessToken } = require("../middleware/jwtVerify");
+const { verifyAccessToken, verifyUnsafeAccessToken } = require("../middleware/jwtVerify");
 const userPerms = require("../middleware/usePerms");
 const Movie = require('../models/movie')
 const fetchUser = require('../middleware/fetchUser')
@@ -10,7 +10,7 @@ const User = require("../models/user");
 const Show = require("../models/show");
 
 //Get the movies on the Admin Panel
-router.post('/get-movies', verifyAccessToken, userPerms('isAdmin'), async (req, res) => {
+router.post('/get-movies', verifyUnsafeAccessToken, userPerms('isAdmin'), async (req, res) => {
     try {
         let movies = await Movie.find({})
         res.status(200).json({ success: true, content: movies })
@@ -20,7 +20,7 @@ router.post('/get-movies', verifyAccessToken, userPerms('isAdmin'), async (req, 
 })
 
 //Get the Tv Shows on the Admin Panel
-router.post('/get-shows', verifyAccessToken, userPerms('isAdmin'), async (req, res) => {
+router.post('/get-shows', verifyUnsafeAccessToken, userPerms('isAdmin'), async (req, res) => {
     try {
         let shows = await Show.find({})
         res.status(200).json({ success: true, content: shows })
@@ -39,7 +39,7 @@ router.post('/get-profile', verifyAccessToken, fetchUser, async (req, res) => {
     }
 })
 
-router.post('/get-ratings', verifyAccessToken, async (req, res) => {
+router.post('/get-ratings', verifyUnsafeAccessToken, async (req, res) => {
     try {
         let movieRatings = await Rating.find({ userID: req.verify.id }).populate({ path: 'movieID', model: Movie, select: 'title' })
         let showRatings = await showRating.find({ userID: req.verify.id }).populate({ path: 'showID', model: Show, select: 'title' })

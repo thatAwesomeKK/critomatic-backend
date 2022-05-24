@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const { verifyAccessToken } = require('../middleware/jwtVerify');
+const { verifyAccessToken, verifyUnsafeAccessToken } = require('../middleware/jwtVerify');
 const Movie = require("../models/movie");
 const Rating = require('../models/rating');
 const Show = require("../models/show");
 const showRatings = require("../models/showRatings");
 const User = require("../models/user");
 
-router.post('/add', verifyAccessToken, async (req, res) => {
+router.post('/add', verifyUnsafeAccessToken, async (req, res) => {
     try {
         const { contentID, rate, review } = req.body
         const userID = req.verify.id
@@ -30,7 +30,7 @@ router.post('/add', verifyAccessToken, async (req, res) => {
     }
 
 })
-router.post('/add-show', verifyAccessToken, async (req, res) => {
+router.post('/add-show', verifyUnsafeAccessToken, async (req, res) => {
     try {
         const { contentID, rate, review } = req.body
         const userID = req.verify.id

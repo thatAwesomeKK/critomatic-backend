@@ -20,6 +20,19 @@ const verifyRefreshToken = async (req, res, next) => {
 //this function will verify access token
 const verifyAccessToken = async (req, res, next) => {
   try {
+    let token = req.cookies.accessToken.split(" ")[1]
+    if (!token) {
+      return res.json({ success: false });
+    }
+    req.verify = jwt.verify(token, jwtAccessSecret);
+  } catch (error) {
+    return res.status(401).json({ success: false, error: "Not Authorized" });
+  }
+  next()
+};
+
+const verifyUnsafeAccessToken = async (req, res, next) => {
+  try {
     let token = req.body.accessToken.split(" ")[1]
     if (!token) {
       return res.json({ success: false });
@@ -32,4 +45,4 @@ const verifyAccessToken = async (req, res, next) => {
 };
 
 
-module.exports = { verifyRefreshToken, verifyAccessToken }
+module.exports = { verifyRefreshToken, verifyAccessToken, verifyUnsafeAccessToken }
