@@ -8,7 +8,7 @@ const { verifyRefreshToken, verifyAccessToken } = require('../middleware/jwtVeri
 const fetchUser = require("../middleware/fetchUser");
 const { cloudinary } = require("../cloudinary");
 
-const cookieConfig = { httpOnly: true, domain: '.critomatic.ml'}
+const cookieConfig = { sameSite: 'strict', secure: true, httpOnly: true }
 
 //Endpoint for Registering /api/auth/register
 router.post('/register', [body("email", "Enter a Valid Email").isEmail(),
@@ -113,7 +113,7 @@ router.post("/verify-refresh", verifyRefreshToken, async (req, res) => {
         res.cookie("refreshToken", await getRefreshToken({ id: req.verify.id, tokenVersion: user.tokenVersion }), cookieConfig);
         return res.json({ success: true, accessToken: `Bearer ${accessToken}` });
     } catch (error) {
-        res.clearCookie('refreshToken', { sameSite: 'none', secure: true, httpOnly: true });
+        res.clearCookie('refreshToken', { sameSite: 'strict', secure: true, httpOnly: true });
         return res.status(500).json({ success: false, error: error })
     }
 });
