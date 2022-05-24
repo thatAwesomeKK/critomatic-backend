@@ -52,6 +52,7 @@ body("password").isLength({ min: 5 })],
 
 //Endpoint for login /api/auth/login
 router.post('/login', [body("email", "Enter a Valid Email").isEmail(), body("password").isLength({ min: 5 })], async (req, res) => {
+    console.log(req.body);
 
     try {
         const { email, password } = req.body
@@ -77,6 +78,7 @@ router.post('/login', [body("email", "Enter a Valid Email").isEmail(), body("pas
 
         //generating refresh token
         let refreshToken = await getRefreshToken({ id: foundUser._id, tokenVersion: foundUser.tokenVersion });
+        console.log(refreshToken);
 
         //setting refreshToken in Cookie
         res.cookie("refreshToken", refreshToken, cookieConfig);
