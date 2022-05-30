@@ -91,7 +91,7 @@ router.put("/cal-user-rating", async (req, res) => {
 
         for (let i = 0; i < allRatings.length; i++) {
             const element = await allRatings[i];
-            ratingSum += element.userRating.rating 
+            ratingSum += element.userRating.rating
         }
         let averageRating = ratingSum / allRatings.length
         let rounded = Math.round(averageRating * 10) / 10
@@ -121,7 +121,7 @@ router.put("/cal-user-rating-show", async (req, res) => {
 
         for (let i = 0; i < allRatings.length; i++) {
             const element = await allRatings[i];
-            ratingSum += element.userRating.rating 
+            ratingSum += element.userRating.rating
         }
         let averageRating = ratingSum / allRatings.length
         let rounded = Math.round(averageRating * 10) / 10
@@ -135,6 +135,53 @@ router.put("/cal-user-rating-show", async (req, res) => {
         return res.status(500).json({ success: false, error: "Internal Server Error" })
     }
 
+})
+
+router.delete("/del-rating-movie", verifyUnsafeAccessToken, async (req, res) => {
+    try {
+        const userID = req.verify.id
+        const { ratingID } = req.body
+
+        let foundRating = await Rating.findById(ratingID)
+
+        if (!foundRating) {
+            return res.status(500).json({ success: false, error: "No Movie Found" })
+        }
+
+        let foundUser = await User.findById(userID)
+        if (!foundUser) {
+            return res.status(500).json({ success: false, error: "No User Found" })
+        }
+
+        await Rating.findByIdAndDelete(ratingID)
+
+        return res.status(200).json({ success: true, message: "Review Deleted Successfully" })
+    } catch (error) {
+        return res.status(500).json({ success: false, error: "Internal Server Error" })
+    }
+})
+router.delete("/del-rating-show", verifyUnsafeAccessToken, async (req, res) => {
+    try {
+        const userID = req.verify.id
+        const { ratingID } = req.body
+
+        let foundRatingShow = await showRatings.findById(ratingID)
+
+        if (!foundRatingShow) {
+            return res.status(500).json({ success: false, error: "No Show Found" })
+        }
+
+        let foundUser = await User.findById(userID)
+        if (!foundUser) {
+            return res.status(500).json({ success: false, error: "No User Found" })
+        }
+
+        await showRatings.findByIdAndDelete(ratingID)
+
+        return res.status(200).json({ success: true, message: "Review Deleted Successfully" })
+    } catch (error) {
+        return res.status(500).json({ success: false, error: "Internal Server Error" })
+    }
 })
 
 module.exports = router
