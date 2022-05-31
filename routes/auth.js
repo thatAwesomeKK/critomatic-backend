@@ -52,7 +52,6 @@ body("password").isLength({ min: 5 })],
 
 //Endpoint for login /api/auth/login
 router.post('/login', [body("email", "Enter a Valid Email").isEmail(), body("password").isLength({ min: 5 })], async (req, res) => {
-    console.log(req.body);
     try {
         const { email, password } = req.body
 
@@ -102,18 +101,18 @@ router.post("/verify-refresh", verifyRefreshToken, async (req, res) => {
     try {
         let user = await User.findById({ _id: req.verify.id });
         if (!user) {
-            res.clearCookie('refreshToken', { sameSite: 'none', secure: true, httpOnly: true })
+            res.clearCookie('refreshToken', cookieConfig)
             return res.json({ success: false });
         }
         if (user.tokenVersion !== req.verify.tokenVersion) {
-            res.clearCookie('refreshToken', { sameSite: 'none', secure: true, httpOnly: true })
+            res.clearCookie('refreshToken', cookieConfig)
             return res.json({ success: false, error: "Token Error" });
         }
         let accessToken = await getAccessToken({ id: req.verify.id });
         res.cookie("refreshToken", await getRefreshToken({ id: req.verify.id, tokenVersion: user.tokenVersion }), cookieConfig);
         return res.json({ success: true, accessToken: `Bearer ${accessToken}` });
     } catch (error) {
-        res.clearCookie('refreshToken', { sameSite: 'strict', secure: true, httpOnly: true });
+        res.clearCookie('refreshToken', cookieConfig);
         return res.status(500).json({ success: false, error: error })
     }
 });
@@ -168,5 +167,6 @@ router.put("/update-user", verifyUnsafeAccessToken, fetchUser, async (req, res) 
         return res.status(500).json({ success: false, error: "Internal Server Error" });
     }
 })
+
 
 module.exports = router

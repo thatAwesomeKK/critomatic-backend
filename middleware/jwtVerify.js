@@ -6,12 +6,13 @@ const jwtAccessSecret = process.env.JWT_ACCESS_SECRET;
 const verifyRefreshToken = async (req, res, next) => {
   let token = await req.cookies.refreshToken;
   if (!token) {
+    res.clearCookie('refreshToken', { sameSite: 'none', secure: true, httpOnly: true, domain: process.env.COOKIE_DOMAIN })
     return res.json({ success: false, error: "Token Invalid" });
   }
   try {
     req.verify = jwt.verify(token, jwtRefreshSecret);
   } catch (error) {
-    res.clearCookie('refreshToken', { sameSite: 'none', secure: true, httpOnly: true })
+    res.clearCookie('refreshToken', { sameSite: 'none', secure: true, httpOnly: true, domain: process.env.COOKIE_DOMAIN })
     return res.status(401).json({ success: false, error: "Internal Server Error" });
   }
   next()
