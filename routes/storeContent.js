@@ -8,7 +8,7 @@ const Movie = require('../models/movie')
 const Person = require('../models/person');
 const genres = require("../methods/genre");
 const Show = require('../models/show');
-const { verifyAccessToken, verifyUnsafeAccessToken } = require("../middleware/jwtVerify");
+const { verifyAccessToken } = require("../middleware/jwtVerify");
 const userPerms = require("../middleware/usePerms");
 
 const job = schedule.scheduleJob('0 0 * * THU', async () => {
@@ -217,7 +217,7 @@ const job2 = schedule.scheduleJob('0 0 * * THU', async () => {
 });
 
 
-router.put("/movie-info", verifyUnsafeAccessToken, userPerms("isAdmin"), async (req, res) => {
+router.put("/movie-info", verifyAccessToken, userPerms("isAdmin"), async (req, res) => {
   try {
     const { contentName, boxoffice, platform, duration, adminRating, adminReview, approved } = req.body
 
@@ -243,7 +243,7 @@ router.put("/movie-info", verifyUnsafeAccessToken, userPerms("isAdmin"), async (
 
 
 
-router.put("/show-info", verifyUnsafeAccessToken, userPerms("isAdmin"), async (req, res) => {
+router.put("/show-info", verifyAccessToken, userPerms("isAdmin"), async (req, res) => {
   try {
     const { contentName, platform, episodes, adminRating, adminReview, approved, crewNames } = req.body
 

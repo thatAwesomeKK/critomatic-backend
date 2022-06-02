@@ -4,7 +4,7 @@ const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const User = require('../models/user')
 const { getAccessToken, getRefreshToken } = require("../methods/jwtCreation");
-const { verifyRefreshToken, verifyAccessToken, verifyServerAccessToken, verifyUnsafeAccessToken } = require('../middleware/jwtVerify');
+const { verifyRefreshToken, verifyAccessToken } = require('../middleware/jwtVerify');
 const fetchUser = require("../middleware/fetchUser");
 const { cloudinary } = require("../cloudinary");
 
@@ -98,6 +98,7 @@ router.post('/logout', async (req, res) => {
 
 //Endpoint for refreshing AccessToken /api/auth/verify-refresh
 router.post("/verify-refresh", verifyRefreshToken, async (req, res) => {
+    console.log("Hello");
     try {
         let user = await User.findById({ _id: req.verify.id });
         if (!user) {
@@ -134,7 +135,7 @@ router.post("/token-version", async (req, res) => {
     }
 });
 
-router.put("/update-user", verifyUnsafeAccessToken, fetchUser, async (req, res) => {
+router.put("/update-user", verifyAccessToken, fetchUser, async (req, res) => {
     try {
         const { pfpBase64, username } = req.body
         const user = req.user
