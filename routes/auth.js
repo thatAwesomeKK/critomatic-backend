@@ -98,7 +98,6 @@ router.post('/logout', async (req, res) => {
 
 //Endpoint for refreshing AccessToken /api/auth/verify-refresh
 router.post("/verify-refresh", verifyRefreshToken, async (req, res) => {
-    console.log("Hello");
     try {
         let user = await User.findById({ _id: req.verify.id });
         if (!user) {

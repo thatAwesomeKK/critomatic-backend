@@ -19,20 +19,6 @@ const verifyRefreshToken = async (req, res, next) => {
   next()
 };
 
-//this function will verify access token
-// const verifyAccessToken = async (req, res, next) => {
-//   try {
-//     let token = req.cookies.accessToken.split(" ")[1]
-//     if (!token) {
-//       return res.json({ success: false });
-//     }
-//     req.verify = jwt.verify(token, jwtAccessSecret);
-//   } catch (error) {
-//     return res.status(401).json({ success: false, error: "Not Authorized" });
-//   }
-//   next()
-// };
-
 const verifyAccessToken = async (req, res, next) => {
   try {
     let token = await req.body.accessToken.split(" ")[1]
