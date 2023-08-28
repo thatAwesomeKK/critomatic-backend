@@ -104,7 +104,6 @@ router.get("/get-single-content", async (req, res) => {
     slug = slug.split("@");
     const contentType = slug[0];
     const content = slug[1];
-    console.log(content);
 
     let finalContent = {};
 

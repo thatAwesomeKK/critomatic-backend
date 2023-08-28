@@ -74,21 +74,4 @@ router.post("/", async (req, res) => {
   }
 });
 
-// router.post("/uploadimg", async (req, res) => {
-//   try {
-//     const { data } = req.body
-
-//     const pfp = `data:image/png;base64,${data}`
-
-//     let response = await cloudinary.uploader.upload(pfp, {
-//       upload_preset: "profile_pics"
-//     });
-
-//     res
-//   } catch (error) {
-//     console.log(response);
-//   }
-
-// })
-
 module.exports = router  
