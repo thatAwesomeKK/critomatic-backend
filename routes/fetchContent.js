@@ -126,15 +126,30 @@ router.get("/get-single-content", async (req, res) => {
 //Get all the slugs to use getStaticProps
 router.get("/get-slugs", async (req, res) => {
   try {
-    let movieSlugs = await Movie.find({ approved: true }).select("slug");
-    let showSlugs = await Show.find({ approved: true }).select("slug");
+    let movie = await Movie.find({ approved: true }).select("slug");
+    let show = await Show.find({ approved: true }).select("slug");
 
-    movieSlugs.forEach(element => {
-      element.slug = `movies@${element.slug}`
+    const movieSlugs = [];
+    const showSlugs = [];
+
+    for (let i = 0; i < movieSlugs.length; i++) {
+      movieSlugs[i].newProperty = "movies";
+    }
+
+    movie.forEach((element) => {
+      const newOb = {
+        slug: `movies@${element.slug}`,
+        contentType: "movies",
+      };
+      movieSlugs.push(newOb);
     });
 
-    showSlugs.forEach(element => {
-      element.slug = `shows@${element.slug}`
+    show.forEach((element) => {
+      const newOb = {
+        slug: `shows@${element.slug}`,
+        contentType: "shows",
+      };
+      showSlugs.push(newOb);
     });
 
     return res.status(200).json({ content: [...movieSlugs, ...showSlugs] });
