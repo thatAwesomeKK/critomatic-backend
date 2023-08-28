@@ -125,7 +125,7 @@ router.post(
 );
 
 //Endpoint for logout /api/auth/logout
-router.post("/logout", async (req, res) => {
+router.get("/logout", async (req, res) => {
   try {
     //Clearing Cookies on Client
     res.clearCookie("refreshToken", cookieConfig);
@@ -157,6 +157,25 @@ router.post("/refresh-token", verifyRefreshToken, async (req, res) => {
       cookieConfig
     );
     return res.json({ success: true, accessToken: `Bearer ${accessToken}` });
+  } catch (error) {
+    res.clearCookie("refreshToken", cookieConfig);
+    return res.status(500).json({ success: false, error: error });
+  }
+});
+
+//Endpoint for refreshing AccessToken /api/auth/verify-refresh-token
+router.get("/verify-refresh-token", verifyRefreshToken, async (req, res) => {
+  try {
+    const user = await User.findById({ _id: req.verify.id });
+    if (!user) {
+      res.clearCookie("refreshToken", cookieConfig);
+      return res.json({ success: false, error: "User Does not exists" });
+    }
+    if (user.tokenVersion !== req.verify.tokenVersion) {
+      res.clearCookie("refreshToken", cookieConfig);
+      return res.json({ success: false, error: "Token Error" });
+    }
+    return res.json({ success: true, message: "Refresh token verified!" });
   } catch (error) {
     res.clearCookie("refreshToken", cookieConfig);
     return res.status(500).json({ success: false, error: error });

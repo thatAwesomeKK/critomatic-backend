@@ -7,20 +7,10 @@ const Show = require("../models/show");
 const showRatings = require("../models/showRatings");
 const User = require("../models/user");
 
-const decypherSlug = (slug) => {
-  slug = slug.split("@");
-  const contentType = slug[0];
-  const content = slug[1];
-  return { contentType, content };
-};
-
 router.post("/add", verifyAccessToken, async (req, res) => {
   try {
     const { contentID, rating, review } = req.body;
-    const slug = req.query.slug;
-
-    const contentType = decypherSlug(slug).contentType;
-
+    const contentType = req.query.contentType;
     const userID = req.verify.id;
 
     let finalContent = undefined;
@@ -126,10 +116,7 @@ const calUserRating = async (contentID, contentType) => {
 router.get("/get", async (req, res) => {
   try {
     const contentID = req.query.contentid;
-    const slug = req.query.slug;
-
-    const contentType = decypherSlug(slug).contentType;
-
+    const contentType = req.query.contentType;
     let ratings = undefined;
 
     if (contentType === "movies") {

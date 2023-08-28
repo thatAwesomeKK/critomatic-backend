@@ -100,19 +100,17 @@ router.post("/show-update", async (req, res) => {
 //Get Single Movie with the Slug
 router.get("/get-single-content", async (req, res) => {
   try {
-    let slug = req.query.slug;
-    slug = slug.split("@");
-    const contentType = slug[0];
-    const content = slug[1];
+    const slug = req.query.slug;
+    const contentType = req.query.contentType;
 
     let finalContent = {};
 
     if (contentType === "movies") {
-      finalContent = await Movie.findOne({ slug: content })
+      finalContent = await Movie.findOne({ slug })
         .populate({ path: "crew.crewID", model: Person, select: "name img" })
         .populate({ path: "cast.castID", model: Person, select: "name img" });
     } else if (contentType === "shows") {
-      finalContent = await Show.findOne({ slug: content })
+      finalContent = await Show.findOne({ slug })
         .populate({ path: "crew.crewID", model: Person, select: "name img" })
         .populate({ path: "cast.castID", model: Person, select: "name img" });
     }
