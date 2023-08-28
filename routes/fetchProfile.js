@@ -39,12 +39,12 @@ router.post('/get-profile', verifyAccessToken, fetchUser, async (req, res) => {
     }
 })
 
-router.post('/get-ratings', verifyAccessToken, async (req, res) => {
+router.get('/get-ratings', verifyAccessToken, async (req, res) => {
     try {
-        let movieRatings = await Rating.find({ userID: req.verify.id }).populate({ path: 'movieID', model: Movie, select: 'title' })
-        let showRatings = await showRating.find({ userID: req.verify.id }).populate({ path: 'showID', model: Show, select: 'title' })
+        const movieRatings = await Rating.find({ userID: req.verify.id }).populate({ path: 'movieID', model: Movie, select: 'title' })
+        const showRatings = await showRating.find({ userID: req.verify.id }).populate({ path: 'showID', model: Show, select: 'title' })
 
-        res.json({ success: true, movieRatings, showRatings })
+        res.status(200).json({ success: true, movieRatings, showRatings })
     } catch (error) {
         res.status(401).json({ success: false, error: "Internal Server Error" })
     }

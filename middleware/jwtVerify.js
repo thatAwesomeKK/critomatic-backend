@@ -1,27 +1,34 @@
 const jwt = require("jsonwebtoken");
 const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
 const jwtAccessSecret = process.env.JWT_ACCESS_SECRET;
-const cookieConfig = { sameSite: 'none', secure: true, httpOnly: true, domain: process.env.COOKIE_DOMAIN }
+const cookieConfig = {
+  sameSite: "none",
+  secure: true,
+  httpOnly: true,
+  domain: process.env.COOKIE_DOMAIN,
+};
 
 //this function will verify refresh token
 const verifyRefreshToken = async (req, res, next) => {
-  let token = await req.cookies.refreshToken;
+  const token = await req.headers["x-refresh-token"];
   if (!token) {
-    res.clearCookie('refreshToken', cookieConfig);
+    res.clearCookie("refreshToken", cookieConfig);
     return res.json({ success: false, error: "Token Invalid" });
   }
   try {
     req.verify = jwt.verify(token, jwtRefreshSecret);
   } catch (error) {
-    res.clearCookie('refreshToken', cookieConfig);
-    return res.status(401).json({ success: false, error: "Internal Server Error" });
+    res.clearCookie("refreshToken", cookieConfig);
+    return res
+      .status(401)
+      .json({ success: false, error: "Internal Server Error" });
   }
-  next()
+  next();
 };
 
 const verifyAccessToken = async (req, res, next) => {
   try {
-    let token = await req.body.accessToken.split(" ")[1]
+    const token = await req.headers["x-access-token"].split(" ")[1];
     if (!token) {
       return res.json({ success: false });
     }
@@ -29,8 +36,7 @@ const verifyAccessToken = async (req, res, next) => {
   } catch (error) {
     return res.status(401).json({ success: false, error: "Not Authorized" });
   }
-  next()
+  next();
 };
 
-
-module.exports = { verifyRefreshToken, verifyAccessToken }
+module.exports = { verifyRefreshToken, verifyAccessToken };
