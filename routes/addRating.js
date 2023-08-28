@@ -55,7 +55,9 @@ router.post("/add", verifyAccessToken, async (req, res) => {
       });
     }
 
-    await newRating.save()
+    await newRating.save();
+
+    await calUserRating(contentID, contentType);
 
     return res
       .status(200)
@@ -66,6 +68,60 @@ router.post("/add", verifyAccessToken, async (req, res) => {
       .json({ success: false, error: "Internal Server Error" });
   }
 });
+
+const calUserRating = async (contentID, contentType) => {
+  try {
+    let foundContent;
+    if (contentType === "movies")
+      foundContent = await Movie.findById({ _id: contentID });
+    else if (contentType === "shows")
+      foundContent = await Show.findById({ _id: contentID });
+
+    if (!foundContent) {
+      return res.status(500).json({ error: "Content Not Found!" });
+    }
+
+    let allRatings;
+
+    if (contentType === "movies")
+      allRatings = await Rating.find({ movieID: contentID }).select(
+        "userRating.rating"
+      );
+    else if (contentType === "shows")
+      allRatings = await showRatings
+        .find({ showID: contentID })
+        .select("userRating.rating");
+
+    let ratingSum = 0;
+
+    for (let i = 0; i < allRatings.length; i++) {
+      const element = await allRatings[i];
+      ratingSum += element.userRating.rating;
+    }
+    let averageRating = ratingSum / allRatings.length;
+    let rounded = Math.round(averageRating * 10) / 10;
+
+    const newUserRating = {};
+    if (rounded) {
+      newUserRating.userRating = rounded;
+    }
+
+    if (contentType === "movies")
+      await Movie.findByIdAndUpdate(
+        foundContent._id,
+        { $set: newUserRating },
+        { new: true }
+      );
+    else if (contentType === "shows")
+      await Show.findByIdAndUpdate(
+        foundContent._id,
+        { $set: newUserRating },
+        { new: true }
+      );
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 router.get("/get", async (req, res) => {
   try {
@@ -96,133 +152,30 @@ router.get("/get", async (req, res) => {
   }
 });
 
-router.put("/cal-user-rating", async (req, res) => {
-  const movieID = req.headers.contentid;
 
-  try {
-    let foundMovie = await Movie.findById({ _id: movieID });
-    if (!foundMovie) {
-      return res.status(500).json({ error: "Movie Not Found" });
-    }
-
-    let allRatings = await Rating.find({ movieID: movieID }).select(
-      "userRating.rating"
-    );
-
-    let ratingSum = 0;
-
-    for (let i = 0; i < allRatings.length; i++) {
-      const element = await allRatings[i];
-      ratingSum += element.userRating.rating;
-    }
-    let averageRating = ratingSum / allRatings.length;
-    let rounded = Math.round(averageRating * 10) / 10;
-
-    const newUserRating = {};
-    if (rounded) {
-      newUserRating.userRating = rounded;
-    }
-
-    await Movie.findByIdAndUpdate(
-      foundMovie._id,
-      { $set: newUserRating },
-      { new: true }
-    );
-    res
-      .status(200)
-      .json({ success: true, message: "User Rating has been updated" });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ success: false, error: "Internal Server Error" });
-  }
-});
-router.put("/cal-user-rating-show", async (req, res) => {
-  const showID = req.headers.contentid;
-
-  try {
-    let foundShow = await Show.findById({ _id: showID });
-    if (!foundShow) {
-      return res.status(500).json({ error: "Show Not Found" });
-    }
-
-    let allRatings = await showRatings
-      .find({ showID: showID })
-      .select("userRating.rating");
-
-    let ratingSum = 0;
-
-    for (let i = 0; i < allRatings.length; i++) {
-      const element = await allRatings[i];
-      ratingSum += element.userRating.rating;
-    }
-    let averageRating = ratingSum / allRatings.length;
-    let rounded = Math.round(averageRating * 10) / 10;
-
-    const newUserRating = {};
-    if (rounded) {
-      newUserRating.userRating = rounded;
-    }
-
-    await Show.findByIdAndUpdate(
-      foundShow._id,
-      { $set: newUserRating },
-      { new: true }
-    );
-    res
-      .status(200)
-      .json({ success: true, message: "User Rating has been updated" });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ success: false, error: "Internal Server Error" });
-  }
-});
-
-router.delete("/del-rating-movie", verifyAccessToken, async (req, res) => {
+router.delete("/del-rating", verifyAccessToken, async (req, res) => {
   try {
     const userID = req.verify.id;
-    const { ratingID } = req.body;
+    const { contentType, ratingID } = req.body;
 
-    let foundRating = await Rating.findById(ratingID);
+    let foundRating;
+
+    if (contentType === "movies") foundRating = await Rating.findById(ratingID);
+    else if (contentType === "shows")
+      foundRating = await showRatings.findById(ratingID);
 
     if (!foundRating) {
       return res.status(500).json({ success: false, error: "No Movie Found" });
     }
 
-    let foundUser = await User.findById(userID);
+    const foundUser = await User.findById(userID);
     if (!foundUser) {
       return res.status(500).json({ success: false, error: "No User Found" });
     }
 
-    await Rating.findByIdAndDelete(ratingID);
-
-    return res
-      .status(200)
-      .json({ success: true, message: "Review Deleted Successfully" });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ success: false, error: "Internal Server Error" });
-  }
-});
-router.delete("/del-rating-show", verifyAccessToken, async (req, res) => {
-  try {
-    const userID = req.verify.id;
-    const { ratingID } = req.body;
-
-    let foundRatingShow = await showRatings.findById(ratingID);
-
-    if (!foundRatingShow) {
-      return res.status(500).json({ success: false, error: "No Show Found" });
-    }
-
-    let foundUser = await User.findById(userID);
-    if (!foundUser) {
-      return res.status(500).json({ success: false, error: "No User Found" });
-    }
-
-    await showRatings.findByIdAndDelete(ratingID);
+    if (contentType === "movies") await Rating.findByIdAndDelete(ratingID);
+    else if (contentType === "shows")
+      await showRatings.findByIdAndDelete(ratingID);
 
     return res
       .status(200)
