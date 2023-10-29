@@ -207,33 +207,22 @@ router.post("/token-version", async (req, res) => {
 
 router.put("/update-user", verifyAccessToken, fetchUser, async (req, res) => {
   try {
-    const { pfpBase64, username } = req.body;
-
+    const { pfp, username } = req.body;
     //Uploading the pfp
-    let pfp = "";
-    let response = "";
-    if (pfpBase64) {
-      pfp = `data:image/png;base64,${pfpBase64}`;
+    const user = req.verify
+    console.log(user);
+    let updUser = {};
 
-      response = await cloudinary.uploader.upload(pfp, {
+    if (pfp) {
+      const response = await cloudinary.uploader.upload(pfp, {
         upload_preset: "profile_pics",
       });
-    }
-
-    //Making New User
-    const newUser = {};
-    if (pfp) {
-      newUser.pfp = response.secure_url;
+      updUser.pfp = response.secure_url;
     }
     if (username) {
-      newUser.username = username;
+      updUser.username = username;
     }
-
-    await User.findByIdAndUpdate(
-      req.user._id,
-      { $set: newUser },
-      { new: true }
-    );
+    await User.findByIdAndUpdate({ _id: user.id }, updUser);
     return res
       .status(200)
       .json({ success: true, message: "Updated Successfully!" });
