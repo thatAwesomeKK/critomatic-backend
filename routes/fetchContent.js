@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const Slider = require("../models/homeslider");
 const Movie = require("../models/movie");
 const Person = require("../models/person");
 const Show = require("../models/show");

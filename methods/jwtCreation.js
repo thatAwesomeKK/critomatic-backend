@@ -10,8 +10,4 @@ const getAccessToken = async (data) => {
   });
 };
 
-const getRefreshToken = async (data) => {
-  return jwt.sign(data, jwtRefreshSecret, { expiresIn: "1d" });
-};
-
-module.exports = { getAccessToken, getRefreshToken };
+module.exports = { getAccessToken };
