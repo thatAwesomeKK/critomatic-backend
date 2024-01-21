@@ -105,17 +105,12 @@ router.post(
 
       const accessToken = await getAccessToken({ id: foundUser._id });
 
-      //generating refresh token
-      const refreshToken = await getRefreshToken({
-        id: foundUser._id,
-        tokenVersion: foundUser.tokenVersion,
-      });
-
       //setting refreshToken in Cookie
-      res.cookie("refreshToken", refreshToken, cookieConfig);
-      return res
-        .status(200)
-        .json({ success: true, accessToken: `Bearer ${accessToken}` });
+      res.cookie("accessToken", "Bearer " + accessToken, cookieConfig);
+      return res.status(200).json({
+        success: true,
+        message: "Logged In Successfully!",
+      });
     } catch (error) {
       return res
         .status(500)
@@ -136,48 +131,48 @@ router.get("/logout", async (req, res) => {
 });
 
 //Endpoint for refreshing AccessToken /api/auth/refresh-token
-router.post("/refresh-token", verifyRefreshToken, async (req, res) => {
-  try {
-    const user = await User.findById({ _id: req.verify.id });
-    if (!user) {
-      res.clearCookie("refreshToken", cookieConfig);
-      return res.json({ success: false });
-    }
-    if (user.tokenVersion !== req.verify.tokenVersion) {
-      res.clearCookie("refreshToken", cookieConfig);
-      return res.json({ success: false, error: "Token Error" });
-    }
-    const accessToken = await getAccessToken({ id: req.verify.id });
-    res.cookie(
-      "refreshToken",
-      await getRefreshToken({
-        id: req.verify.id,
-        tokenVersion: user.tokenVersion,
-      }),
-      cookieConfig
-    );
-    return res.json({ success: true, accessToken: `Bearer ${accessToken}` });
-  } catch (error) {
-    res.clearCookie("refreshToken", cookieConfig);
-    return res.status(500).json({ success: false, error: error });
-  }
-});
+// router.post("/refresh-token", verifyRefreshToken, async (req, res) => {
+//   try {
+//     const user = await User.findById({ _id: req.verify.id });
+//     if (!user) {
+//       res.clearCookie("refreshToken", cookieConfig);
+//       return res.json({ success: false });
+//     }
+//     if (user.tokenVersion !== req.verify.tokenVersion) {
+//       res.clearCookie("refreshToken", cookieConfig);
+//       return res.json({ success: false, error: "Token Error" });
+//     }
+//     const accessToken = await getAccessToken({ id: req.verify.id });
+//     res.cookie(
+//       "refreshToken",
+//       await getRefreshToken({
+//         id: req.verify.id,
+//         tokenVersion: user.tokenVersion,
+//       }),
+//       cookieConfig
+//     );
+//     return res.json({ success: true, accessToken: `Bearer ${accessToken}` });
+//   } catch (error) {
+//     res.clearCookie("refreshToken", cookieConfig);
+//     return res.status(500).json({ success: false, error: error });
+//   }
+// });
 
 //Endpoint for refreshing AccessToken /api/auth/verify-refresh-token
-router.get("/verify-refresh-token", verifyRefreshToken, async (req, res) => {
+router.get("/verify-access-token", verifyAccessToken, async (req, res) => {
   try {
     const user = await User.findById({ _id: req.verify.id });
     if (!user) {
-      res.clearCookie("refreshToken", cookieConfig);
+      res.clearCookie("accessToken", cookieConfig);
       return res.json({ success: false, error: "User Does not exists" });
     }
     if (user.tokenVersion !== req.verify.tokenVersion) {
-      res.clearCookie("refreshToken", cookieConfig);
+      res.clearCookie("accessToken", cookieConfig);
       return res.json({ success: false, error: "Token Error" });
     }
-    return res.json({ success: true, message: "Refresh token verified!" });
+    return res.json({ success: true, message: "Access token verified!" });
   } catch (error) {
-    res.clearCookie("refreshToken", cookieConfig);
+    res.clearCookie("accessToken", cookieConfig);
     return res.status(500).json({ success: false, error: error });
   }
 });
@@ -209,7 +204,7 @@ router.put("/update-user", verifyAccessToken, fetchUser, async (req, res) => {
   try {
     const { pfp, username } = req.body;
     //Uploading the pfp
-    const user = req.verify
+    const user = req.verify;
     console.log(user);
     let updUser = {};
 
