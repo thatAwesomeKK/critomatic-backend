@@ -123,40 +123,12 @@ router.post(
 router.get("/logout", async (req, res) => {
   try {
     //Clearing Cookies on Client
-    res.clearCookie("refreshToken", cookieConfig);
+    res.clearCookie("accessToken", cookieConfig);
     return res.json({ success: true });
   } catch (error) {
     return res.status(500).json({ success: false, error: error });
   }
 });
-
-//Endpoint for refreshing AccessToken /api/auth/refresh-token
-// router.post("/refresh-token", verifyRefreshToken, async (req, res) => {
-//   try {
-//     const user = await User.findById({ _id: req.verify.id });
-//     if (!user) {
-//       res.clearCookie("refreshToken", cookieConfig);
-//       return res.json({ success: false });
-//     }
-//     if (user.tokenVersion !== req.verify.tokenVersion) {
-//       res.clearCookie("refreshToken", cookieConfig);
-//       return res.json({ success: false, error: "Token Error" });
-//     }
-//     const accessToken = await getAccessToken({ id: req.verify.id });
-//     res.cookie(
-//       "refreshToken",
-//       await getRefreshToken({
-//         id: req.verify.id,
-//         tokenVersion: user.tokenVersion,
-//       }),
-//       cookieConfig
-//     );
-//     return res.json({ success: true, accessToken: `Bearer ${accessToken}` });
-//   } catch (error) {
-//     res.clearCookie("refreshToken", cookieConfig);
-//     return res.status(500).json({ success: false, error: error });
-//   }
-// });
 
 //Endpoint for refreshing AccessToken /api/auth/verify-refresh-token
 router.get("/verify-access-token", verifyAccessToken, async (req, res) => {
